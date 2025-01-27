@@ -1,25 +1,23 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name        = "electrickiwi-api"
-version     = "0.8.5"
+version     = "0.9.3"
 license     = {text = "GNU-3.0"}
+
+[tool.poetry]
+name        = "electrickiwi-api"
+version     = "0.9.3"
 description = ""
 readme      = "README.md"
 authors     = [
-    {name = "Michael Arthur", email = "michael@jumblesoft.co.nz"}
+    "Michael Arthur <michael@jumblesoft.co.nz>"
 ]
 
-
-requires-python = ">=3.9.0"
-dependencies    = [
-    "aiohttp>=3.8.1"
-    ]
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+aiohttp = ">=3.8.1"
 
 [tool.bumpver]
-current_version = "0.8.5"
+current_version = "0.9.3"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "Bump version {old_version} -> {new_version}"
 commit          = true

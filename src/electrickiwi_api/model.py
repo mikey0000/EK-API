@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Union
 from typing import Any
 
 from dataclasses import dataclass
@@ -41,109 +41,168 @@ class AccountBalanceConnection:
         )
 
 
+
 @dataclass
-class AccountBalance:
-    connections: List[AccountBalanceConnection]
-    last_billed_amount: str
-    last_billed_date: str
-    next_billing_date: str
-    is_prepay: str
-    summary: Summary
-    total_account_balance: str
-    total_billing_days: int
-    total_running_balance: str
-    type: str
+class Connection:
+    id: int
+    running_balance: str
+    unbilled_days: int
+    hop_percentage: str
+    start_date: str
+    service_label: str
 
     @staticmethod
-    def from_dict(account_balance_data: dict) -> "AccountBalance":
-        account_balance = account_balance_data.get("data")
-
-        _connections = [
-            AccountBalanceConnection.from_dict(y)
-            for y in account_balance.get("connections")
-        ]
-        _last_billed_amount = str(account_balance.get("last_billed_amount"))
-        _last_billed_date = str(account_balance.get("last_billed_date"))
-        _next_billing_date = str(account_balance.get("next_billing_date"))
-        _is_prepay = str(account_balance.get("is_prepay"))
-        _summary = Summary.from_dict(account_balance.get("summary"))
-        _total_account_balance = str(account_balance.get("total_account_balance"))
-        _total_billing_days = int(account_balance.get("total_billing_days"))
-        _total_running_balance = str(account_balance.get("total_running_balance"))
-        _type = str(account_balance.get("type"))
-        return AccountBalance(
-            _connections,
-            _last_billed_amount,
-            _last_billed_date,
-            _next_billing_date,
-            _is_prepay,
-            _summary,
-            _total_account_balance,
-            _total_billing_days,
-            _total_running_balance,
-            _type,
+    def from_dict(data: dict[str, Any]) -> 'Connection':
+        return Connection(
+            id=int(data.get('id', 0)),
+            running_balance=str(data.get('running_balance', '0')),
+            unbilled_days=int(data.get('unbilled_days', 0)),
+            hop_percentage=str(data.get('hop_percentage', '0')),
+            start_date=str(data.get('start_date', '')),
+            service_label=str(data.get('service_label', ''))
         )
 
+
+@dataclass
+class ServicePower:
+    connections: List[Connection]
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> 'ServicePower':
+        return ServicePower(
+            connections=[Connection.from_dict(conn) for conn in data.get('connections', [])]
+        )
+
+
+@dataclass
+class AccountSummary:
+    type: str
+    total_running_balance: str
+    total_account_balance: str
+    total_billing_days: int
+    next_billing_date: str
+    service_names: List[str]
+    services: dict[str, ServicePower]
+    date_to_pay: str
+    invoice_id: str
+    total_invoiced_charges: str
+    default_to_pay: str
+    invoice_exists: int
+    display_date: str
+    last_billed_date: str
+    last_billed_amount: int
+    summary: Summary
+    is_prepay: str
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> 'AccountSummary':
+        if not data or 'data' not in data:
+            raise ValueError("Invalid data format")
+
+        data = data.get('data')
+        return AccountSummary(
+            type=str(data.get('type', '')),
+            total_running_balance=str(data.get('total_running_balance', '0')),
+            total_account_balance=str(data.get('total_account_balance', '0')),
+            total_billing_days=int(data.get('total_billing_days', 0)),
+            next_billing_date=str(data.get('next_billing_date', '')),
+            service_names=data.get('service_names', []),
+            services={
+                'power': ServicePower.from_dict(data.get('services', {}).get('power', {}))
+            },
+            date_to_pay=str(data.get('date_to_pay', '')),
+            invoice_id=str(data.get('invoice_id', '')),
+            total_invoiced_charges=str(data.get('total_invoiced_charges', '')),
+            default_to_pay=str(data.get('default_to_pay', '')),
+            invoice_exists=int(data.get('invoice_exists', 0)),
+            display_date=str(data.get('display_date', '')),
+            last_billed_date=str(data.get('last_billed_date', '')),
+            last_billed_amount=int(str(data.get('last_billed_amount', '0'))),
+            summary=Summary.from_dict(data.get('summary', {})),
+            is_prepay=str(data.get('is_prepay', ''))
+        )
 
 @dataclass
 class Customer:
     bill_address_1: str
     bill_address_2: str
     bill_city: str
-    bill_company: str
+    bill_company: Union[str, bool]
     bill_name: str
     bill_post_code: str
+    billing_day: int
     birth_date: str
-    customer_number: int
+    credit_status: str
+    customer_status: str
+    dummy_schedule_id: int
     email: str
+    email_opt_out: str
+    external_payment_reference: bool
     first_name: str
-    last_name: str
-    middle_name: str
-    phone_number: str
     gender: str
     is_active: str
-    medically_dependent_customer: str
+    invite_friend: int
+    last_name: str
+    mdc: str
+    middle_name: str
+    phone_area_code: str
+    phone_number: str
+    retain: str
+    signup_date: str
+    tcs: str
+    update_payment_method: str
+    vulnerable_reason: bool
+    services: List[str]
+    hashKey: str
 
     @staticmethod
     def from_dict(customer_data: dict) -> "Customer":
-        customer = customer_data.get("data")
+        """
+        Create a Customer instance from a dictionary.
 
-        _bill_address_1 = str(customer.get("bill_address_1"))
-        _bill_address_2 = str(customer.get("bill_address_2"))
-        _bill_city = str(customer.get("bill_city"))
-        _bill_company = str(customer.get("bill_company"))
-        _bill_name = str(customer.get("bill_name"))
-        _bill_post_code = str(customer.get("bill_post_code"))
-        _birth_date = str(customer.get("birth_date"))
-        _customer_number = int(customer.get("customer_number"))
-        _email = str(customer.get("email"))
-        _first_name = str(customer.get("first_name"))
-        _last_name = str(customer.get("last_name"))
-        _middle_name = str(customer.get("middle_name"))
-        _phone_number = str(customer.get("phone_number"))
-        _gender = str(customer.get("gender"))
-        _is_active = str(customer.get("is_active"))
-        _medically_dependent_customer = str(
-            customer.get("medically_dependent_customer")
-        )
-        return Customer(
-            _bill_address_1,
-            _bill_address_2,
-            _bill_city,
-            _bill_company,
-            _bill_name,
-            _bill_post_code,
-            _birth_date,
-            _customer_number,
-            _email,
-            _first_name,
-            _last_name,
-            _middle_name,
-            _phone_number,
-            _gender,
-            _is_active,
-            _medically_dependent_customer,
-        )
+        Args:
+            customer_data: Dictionary containing customer information
+
+        Returns:
+            Customer: A new Customer instance
+        """
+        try:
+            customer = customer_data.get("data", {})
+
+            return Customer(
+                bill_address_1=str(customer.get("bill_address_1", "")),
+                bill_address_2=str(customer.get("bill_address_2", "")),
+                bill_city=str(customer.get("bill_city", "")),
+                bill_company=customer.get("bill_company", False),
+                bill_name=str(customer.get("bill_name", "")),
+                bill_post_code=str(customer.get("bill_post_code", "")),
+                billing_day=int(customer.get("billing_day", 0)),
+                birth_date=str(customer.get("birth_date", "")),
+                credit_status=str(customer.get("credit_status", "")),
+                customer_status=str(customer.get("customer_status", "")),
+                dummy_schedule_id=int(customer.get("dummy_schedule_id", 0)),
+                email=str(customer.get("email", "")),
+                email_opt_out=str(customer.get("email_opt_out", "")),
+                external_payment_reference=bool(customer.get("external_payment_reference", False)),
+                first_name=str(customer.get("first_name", "")),
+                gender=str(customer.get("gender", "")),
+                is_active=str(customer.get("is_active", "")),
+                invite_friend=int(customer.get("invite_friend", 0)),
+                last_name=str(customer.get("last_name", "")),
+                mdc=str(customer.get("mdc", "")),
+                middle_name=str(customer.get("middle_name", "")),
+                phone_area_code=str(customer.get("phone_area_code", "")),
+                phone_number=str(customer.get("phone_number", "")),
+                retain=str(customer.get("retain", "")),
+                signup_date=str(customer.get("signup_date", "")),
+                tcs=str(customer.get("tcs", "")),
+                update_payment_method=str(customer.get("update_payment_method", "")),
+                vulnerable_reason=bool(customer.get("vulnerable_reason", False)),
+                services=customer.get("services", []),
+                hashKey=str(customer.get("hashKey", ""))
+            )
+        except Exception as e:
+            raise ValueError(f"Error creating Customer from dictionary: {str(e)}")
 
 
 @dataclass
@@ -203,24 +262,26 @@ class CustomerConnection:
 
 @dataclass
 class BillingAddress:
-    address_1: str
-    address_2: str
-    city: str
-    company: str
-    name: str
-    post_code: str
+    bill_address_1: str
+    bill_address_2: str
+    bill_city: str
+    bill_company: str
+    bill_name: str
+    bill_post_code: str
     type: str
+    id: int
 
     @staticmethod
     def from_dict(billing_address_data: dict) -> "BillingAddress":
         billing_address = billing_address_data.get("data")
 
-        _address_1 = str(billing_address.get("address_1"))
-        _address_2 = str(billing_address.get("address_2"))
-        _city = str(billing_address.get("city"))
-        _company = str(billing_address.get("company"))
-        _name = str(billing_address.get("name"))
-        _post_code = str(billing_address.get("post_code"))
+        _id = str(billing_address.get("id"))
+        _address_1 = str(billing_address.get("bill_address_1"))
+        _address_2 = str(billing_address.get("bill_address_2"))
+        _city = str(billing_address.get("bill_city"))
+        _company = str(billing_address.get("bill_company"))
+        _name = str(billing_address.get("bill_name"))
+        _post_code = str(billing_address.get("bill_post_code"))
         _type = str(billing_address.get("type"))
         return BillingAddress(
             _address_1, _address_2, _city, _company, _name, _post_code, _type
@@ -429,7 +490,7 @@ class UsageCharge:
 @dataclass
 class ConsumptionSummary:
     range: ConsumptionRange
-    usage_charges: List[UsageCharge]
+    usage: List[UsageCharge]
     type: str
 
     @staticmethod
@@ -437,7 +498,7 @@ class ConsumptionSummary:
         consumption_summary = consumption_summary_data.get("data")
         _range = ConsumptionRange.from_dict(consumption_summary.get("range"))
         _usage_charges = [
-            UsageCharge.from_dict(y) for y in consumption_summary.get("usage_charges")
+            UsageCharge.from_dict(y) for y in consumption_summary.get("usage")
         ]
         _type = str(consumption_summary.get("type"))
         return ConsumptionSummary(_range, _usage_charges, _type)
@@ -566,9 +627,10 @@ class HopInterval:
 
 @dataclass
 class HopIntervals:
-    hop_duration: str
     type: str
+    hop_duration: str
     intervals: OrderedDict[int, HopInterval]
+    service_type: str
 
     @staticmethod
     def from_dict(hop_intervals_data: Any) -> "HopIntervals":
@@ -581,7 +643,8 @@ class HopIntervals:
                 hop_intervals.get("intervals").get(y)
             )
         _intervals = OrderedDict(sorted(_intervals.items()))
-        return HopIntervals(_hop_duration, _type, _intervals)
+        _service_type = hop_intervals.get("service_type")
+        return HopIntervals(_hop_duration, _type, _intervals, _service_type)
 
 
 @dataclass
@@ -615,30 +678,18 @@ class Hop:
     end: End
     start: Start
     type: str
+    service_type: str
 
     @staticmethod
     def from_dict(hop_data: Any) -> "Hop":
         hop = hop_data.get("data")
         _connection_id = str(hop.get("connection_id"))
-        _customer_number = int(hop.get("customer_number"))
+        _customer_number = int(hop.get("customer_id"))
         _end = End.from_dict(hop.get("end"))
         _start = Start.from_dict(hop.get("start"))
         _type = str(hop.get("type"))
-        return Hop(_connection_id, _customer_number, _end, _start, _type)
-
-
-@dataclass
-class Connection:
-    address: str
-    identifier: str
-    connection_id: int
-
-    @staticmethod
-    def from_dict(obj: Any) -> "Connection":
-        _address = str(obj.get("address"))
-        _identifier = str(obj.get("identifier"))
-        _connection_id = int(obj.get("connection_id"))
-        return Connection(_address, _identifier, _connection_id)
+        _service_type = str(hop.get("service_type"))
+        return Hop(_connection_id, _customer_number, _end, _start, _type, _service_type)
 
 
 @dataclass
@@ -654,48 +705,69 @@ class Subscriptions:
 
 
 @dataclass
+class Service:
+    service: str
+    identifier: str
+    is_primary_service: bool
+    service_status: str
+
+    @staticmethod
+    def from_dict(service: Any) -> "Service":
+        return Service(
+            service=str(service.get("service")),
+            identifier=str(service.get("identifier")),
+            is_primary_service=bool(service.get("is_primary_service")),
+            service_status=str(service.get("service_status"))
+        )
+
+
+@dataclass
 class SessionCustomer:
-    connection: Connection
     customer_number: int
+    customer_name: str
     email: str
-    first_name: str
-    last_name: str
-    is_active: str
-    subscriptions: Subscriptions
+    customer_status: str
+    services: List[Service]
+    res_partner_id: int
+    nuid: str
+    avatar: List  # Keeping as List since it's empty in the example
+
+    def get_primary_electricity_service(self) -> Optional[Service]:
+        """Get the primary electricity service if it exists."""
+        for service in self.services:
+            if (service.service.lower() == "electricity"
+                    and service.is_primary_service):
+                return service
+        return None
 
     @staticmethod
     def from_dict(customer: Any) -> "SessionCustomer":
-        _connection = Connection.from_dict(customer.get("connection"))
-        _customer_number = int(customer.get("customer_number"))
-        _email = str(customer.get("email"))
-        _first_name = str(customer.get("first_name"))
-        _last_name = str(customer.get("last_name"))
-        _is_active = str(customer.get("is_active"))
-        _subscriptions = Subscriptions.from_dict(customer.get("subscriptions"))
         return SessionCustomer(
-            _connection,
-            _customer_number,
-            _email,
-            _first_name,
-            _last_name,
-            _is_active,
-            _subscriptions,
+            customer_number=int(customer.get("customer_number")),
+            customer_name=str(customer.get("customer_name")),
+            email=str(customer.get("email")),
+            customer_status=str(customer.get("customer_status")),
+            services=[Service.from_dict(service) for service in customer.get("services", [])],
+            res_partner_id=int(customer.get("res_partner_id")),
+            nuid=str(customer.get("nuid")),
+            avatar=customer.get("avatar", [])
         )
 
 
 @dataclass
 class Session:
-    customer: List[SessionCustomer]
-    customer_numbers: List[int]
-    type: str
+    data: SessionCustomer
+    status: int
 
     @staticmethod
     def from_dict(session_data: Any) -> "Session":
-        session = session_data.get("data")
-        _customer = [SessionCustomer.from_dict(y) for y in session.get("customer")]
-        _customer_numbers = session.get("customer_numbers")
-        _type = str(session.get("type"))
-        return Session(_customer, _customer_numbers, _type)
+        if data := session_data.get("data"):
+            if session := data.get("data"):
+                return Session(
+                    data=SessionCustomer.from_dict(session),
+                    status=int(session_data.get("status", 0))
+                )
+        return Session(None, 0)  # Or handle this case as needed
 
 
 @dataclass
