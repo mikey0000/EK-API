@@ -1,13 +1,15 @@
 [project]
 name        = "electrickiwi-api"
-version     = "0.9.3"
-license     = {text = "GNU-3.0"}
+version     = "0.9.9"
+license = { text = "GPL-3.0" }
+
 
 [tool.poetry]
 name        = "electrickiwi-api"
-version     = "0.9.3"
+version     = "0.9.9"
 description = ""
 readme      = "README.md"
+license     = "GPL-3.0"
 authors     = [
     "Michael Arthur <michael@jumblesoft.co.nz>"
 ]
@@ -17,7 +19,7 @@ python = ">=3.9,<3.13"
 aiohttp = ">=3.8.1"
 
 [tool.bumpver]
-current_version = "0.9.3"
+current_version = "0.9.9"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "Bump version {old_version} -> {new_version}"
 commit          = true
