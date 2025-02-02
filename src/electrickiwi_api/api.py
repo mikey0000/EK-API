@@ -13,25 +13,25 @@ class ElectricKiwiEndpoint:
     # user services
     user_services = "/user/services/v1/{customerNumber}"
     # scope read_connection_detail
-    customer_connection_details = "/power/v1/connection/details/{customerNumber}/{identifier}/"
+    customer_connection_details = "/power/v1/connection/details/{customerNumber}/{identifier}"
     billing_details = "/user/v1/billing/details/{customerNumber}"
     # scope read_billing_address
-    billing_address = "/user/v1/billing/address/{customerNumber}/"
+    billing_address = "/user/v1/billing/address/{customerNumber}"
     # scope read_billing_frequency
-    billing_frequency = "/user/v1/billing/frequency/{customerNumber}/"
+    billing_frequency = "/user/v1/billing/frequency/{customerNumber}"
     # scope read_billing_bills
-    billing_bills = "/user/v1/billing/bills/{customerNumber}/?limit={limit}&offset={offset}/"
+    billing_bills = "/user/v1/billing/bills/{customerNumber}/?limit={limit}&offset={offset}"
     # scope read_billing_bill_file
-    billing_bill_file = "/user/v1/billing/invoice/{customerNumber}/{billId}/"
+    billing_bill_file = "/user/v1/billing/invoice/{customerNumber}/{billId}"
     # scope read_account_running_balance
-    account_summary = "/user/account/v1/summary/{customerNumber}/"
+    account_summary = "/user/account/v1/summary/{customerNumber}"
     # scope read_consumption_averages
-    consumption_insights = "/power/usage/v1/insights/{customerNumber}/{identifier}/?start_date={startDate}&end_date={" \
-                          "endDate}&group_by={groupBy} "
+    consumption_insights = "/power/usage/v1/insights/{customerNumber}/{identifier}?start_date={startDate}&end_date={" \
+                          "endDate}&group_by={groupBy}"
     # scope read_hop_intervals_config
     hourofpower_intervals = "/power/products/v1/hop_intervals"
     # scope read_hop_connection, save_hop_connection (POST) (hour of power)
-    hourofpower_by_connection = "/power/products/v1/hop/{customerNumber}/{identifier}/"
+    hourofpower_by_connection = "/power/products/v1/hop/{customerNumber}/{identifier}"
     # scope read_outage_contact
     # outageContactInformationForConnection = "/service/outage/contact/{identifier}/"
     # read_session

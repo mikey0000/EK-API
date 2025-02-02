@@ -1,12 +1,12 @@
 [project]
 name        = "electrickiwi-api"
-version     = "0.9.9"
+version     = "0.9.11"
 license = { text = "GPL-3.0" }
 
 
 [tool.poetry]
 name        = "electrickiwi-api"
-version     = "0.9.9"
+version     = "0.9.11"
 description = ""
 readme      = "README.md"
 license     = "GPL-3.0"
@@ -19,7 +19,7 @@ python = ">=3.9,<3.13"
 aiohttp = ">=3.8.1"
 
 [tool.bumpver]
-current_version = "0.9.9"
+current_version = "0.9.11"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "Bump version {old_version} -> {new_version}"
 commit          = true

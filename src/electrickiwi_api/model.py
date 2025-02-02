@@ -90,7 +90,7 @@ class AccountSummary:
     invoice_exists: int
     display_date: str
     last_billed_date: str
-    last_billed_amount: int
+    last_billed_amount: str
     summary: Summary
     is_prepay: str
 
@@ -117,7 +117,7 @@ class AccountSummary:
             invoice_exists=int(data.get('invoice_exists', 0)),
             display_date=str(data.get('display_date', '')),
             last_billed_date=str(data.get('last_billed_date', '')),
-            last_billed_amount=int(str(data.get('last_billed_amount', '0'))),
+            last_billed_amount=str(data.get('last_billed_amount', '0')),
             summary=Summary.from_dict(data.get('summary', {})),
             is_prepay=str(data.get('is_prepay', ''))
         )
