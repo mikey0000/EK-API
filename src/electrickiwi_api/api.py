@@ -46,7 +46,7 @@ def get_next_page(response) -> dict[str, Any]:
 
 
 def check_status(status):
-    if status == 401:
+    if status == 401 or status == 403:
         raise AuthException(f"Authorization failed: {status}")
     if status != 200:
         raise ApiException(f"Error request failed: {status}")
