@@ -1,21 +1,29 @@
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [project]
 name        = "electrickiwi-api"
 version     = "0.9.12"
-license = { text = "GPL-3.0" }
-
-
-[tool.poetry]
-name        = "electrickiwi-api"
-version     = "0.9.12"
-description = ""
-readme      = "README.md"
 license     = "GPL-3.0"
 authors     = [
-    "Michael Arthur <michael@jumblesoft.co.nz>"
+    { name = "Michael Arthur", email = "michael@jumblesoft.co.nz" },
+]
+description = ""
+readme      = "README.md"
+requires-python = ">=3.9"
+dynamic     = ["classifiers", "dependencies"]
+
+[project.urls]
+Homepage    = "https://github.com/mikey0000/EK-API"
+
+[tool.poetry]
+packages = [
+    { include = "electrickiwi_api", from = "src"},
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = "^3.9"
 aiohttp = ">=3.8.1"
 
 [tool.bumpver]
@@ -26,12 +34,7 @@ commit          = true
 tag             = true
 push            = false
 
-
 [tool.bumpver.file_patterns]
 "pyproject.toml" = ['current_version = "{version}"', 'version     = "{version}"']
 "src/electrickiwi_api/__init__.py" = ["{version}"]
-"setup.cfg" = ["version = {version}"]
 "README.md" = ['\[SemVer {version}\]', 'img.shields.io/static/v1.svg?label=SemVer&message={version}&color=blue']
-
-[tool.setuptools.package-data]
-electrickiwi_api = ["py.typed"]
