@@ -147,7 +147,7 @@ class ElectricKiwiApi:
         return Hop.from_dict(await get_hop.json())
 
     async def post_hop(self, hop_interval: int) -> Hop:
-        data = {id: str(self.customer_number), "start": hop_interval}
+        data = {"id": str(self.customer_number), "start_interval": hop_interval}
         post_hop = await self.auth.request("post", ElectricKiwiEndpoint.hourofpower_by_connection.format(
             customerNumber=self.customer_number,
             identifier=self.electricity.identifier),
