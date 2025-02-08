@@ -32,10 +32,11 @@ class ElectricKiwiEndpoint:
     hourofpower_intervals = "/power/products/v1/hop_intervals"
     # scope read_hop_connection, save_hop_connection (POST) (hour of power)
     hourofpower_by_connection = "/power/products/v1/hop/{customerNumber}/{identifier}"
-    # scope read_outage_contact
-    # outageContactInformationForConnection = "/service/outage/contact/{identifier}/"
     # read_session
     session = "/user/v5/session"
+    # returns the contact info for local network provider
+    # scope read_outage_contact
+    outages = "/user/v1/service/outage/contact/{identifier}"
 
 
 def get_next_page(response) -> dict[str, Any]:
