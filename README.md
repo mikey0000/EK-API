@@ -14,7 +14,7 @@
 [url_pyversions]: https://pypi.python.org/pypi/electrickiwi-api
 
 ## What it does
-Provide a simple API interface to the Electric Kiwi API and includes all endpoints available on the juice hacker site
+Provide a simple API interface to the Electric Kiwi API, requires basic auth using the client id and secret provided by Electric Kiwi.
 
 ## What it does not
 session management / token management, there are enough libraries and frameworks that
