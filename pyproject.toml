@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name        = "electrickiwi-api"
-version     = "0.9.14"
+version     = "0.10.0"
 license     = "GPL-3.0-only"
 authors     = [
     { name = "Michael Arthur", email = "michael@jumblesoft.co.nz" },
@@ -31,7 +31,7 @@ dev = [
 asyncio_mode = "auto"
 
 [tool.bumpver]
-current_version = "0.9.14"
+current_version = "0.10.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "Bump version {old_version} -> {new_version}"
 commit          = true
