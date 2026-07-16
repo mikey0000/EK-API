@@ -11,7 +11,7 @@ authors     = [
 ]
 description = "Async Python client for the Electric Kiwi API"
 readme      = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.8.1",
 ]
