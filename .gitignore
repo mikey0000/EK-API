@@ -236,3 +236,6 @@ fabric.properties
 scripts.txt
 
 .vscode
+
+# HTTP archive captures (may contain auth tokens)
+*.har
