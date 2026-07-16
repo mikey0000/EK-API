@@ -591,24 +591,170 @@ class Usage:
         )
 
 
+def _to_float(obj: Any, key: str, default: float = 0.0) -> float:
+    """Parse a numeric field that the API returns as a string (or number)."""
+    try:
+        return float(obj.get(key))
+    except (TypeError, ValueError):
+        return default
+
+
 @dataclass
-class ConsumptionAverage:
-    group_breakdown: List[str]
-    range: ConsumptionRange
-    type: str
-    usage: List[dict]
+class UsageInterval:
+    """Half-hourly electricity consumption interval."""
+
+    consumption: float
+    time: str
+    consumption_rate: float
+    hop_best: bool
+    hop_interval: bool
 
     @staticmethod
-    def from_dict(consumption_average_data: dict) -> "ConsumptionAverage":
-        consumption_average = consumption_average_data.get("data")
-        _group_breakdown = consumption_average.get("group_breakdown")
-        _range = ConsumptionRange.from_dict(consumption_average.get("range"))
-        _type = str(consumption_average.get("type"))
-        _usage = [
-            {y: [Usage.from_dict(consumption_average.get("usage").get(y))]}
-            for y in consumption_average.get("usage").keys()
-        ]
-        return ConsumptionAverage(_group_breakdown, _range, _type, _usage)
+    def from_dict(obj: Any) -> "UsageInterval":
+        return UsageInterval(
+            consumption=_to_float(obj, "consumption"),
+            time=str(obj.get("time", "")),
+            consumption_rate=_to_float(obj, "consumption_rate"),
+            hop_best=bool(obj.get("hop_best")),
+            hop_interval=bool(obj.get("hop_interval")),
+        )
+
+
+@dataclass
+class GenerationInterval:
+    """Half-hourly solar export (feed-in) interval."""
+
+    generation: float
+    time: str
+    generation_rate: float
+    hop_best: bool
+    hop_interval: bool
+
+    @staticmethod
+    def from_dict(obj: Any) -> "GenerationInterval":
+        return GenerationInterval(
+            generation=_to_float(obj, "generation"),
+            time=str(obj.get("time", "")),
+            generation_rate=_to_float(obj, "generation_rate"),
+            hop_best=bool(obj.get("hop_best")),
+            hop_interval=bool(obj.get("hop_interval")),
+        )
+
+
+@dataclass
+class FeedInTariffs:
+    """Solar feed-in details for one usage period."""
+
+    generation: float
+    solar_charges_excl_gst: float
+    solar_charges_incl_gst: float
+    percent_usage_savings: float
+    highest_export_interval: int
+    usage_type: str
+    intervals: OrderedDict[int, GenerationInterval]
+    solar_tou_plus: dict
+
+    @staticmethod
+    def from_dict(obj: Any) -> "FeedInTariffs":
+        intervals: OrderedDict[int, GenerationInterval] = OrderedDict()
+        for key, value in sorted(
+            (obj.get("intervals") or {}).items(), key=lambda item: int(item[0])
+        ):
+            intervals[int(key)] = GenerationInterval.from_dict(value)
+        return FeedInTariffs(
+            generation=_to_float(obj, "generation"),
+            solar_charges_excl_gst=_to_float(obj, "solar_charges_excl_gst"),
+            solar_charges_incl_gst=_to_float(obj, "solar_charges_incl_gst"),
+            percent_usage_savings=_to_float(obj, "percent_usage_savings"),
+            highest_export_interval=int(obj.get("highest_export_interval") or 0),
+            usage_type=str(obj.get("usage_type", "")),
+            intervals=intervals,
+            solar_tou_plus=obj.get("solar_tou_plus") or {},
+        )
+
+
+@dataclass
+class DailyUsage:
+    """Usage for one period (a day, or a month when grouped by month)."""
+
+    date: str
+    range: UsageRange
+    consumption: float
+    bill_consumption: float
+    consumption_adjustment: float
+    percent_consumption_adjustment: float
+    fixed_charges_incl_gst: float
+    fixed_charges_excl_gst: float
+    total_charges_incl_gst: float
+    adjustment_charges_incl_gst: float
+    status: str
+    type: str
+    usage_type: str
+    solar_feed_in_tariffs: bool
+    intervals: OrderedDict[int, UsageInterval]
+    feed_in_tariffs: Optional[FeedInTariffs]
+    tou_plus: dict
+
+    @staticmethod
+    def from_dict(date: str, obj: Any) -> "DailyUsage":
+        intervals: OrderedDict[int, UsageInterval] = OrderedDict()
+        # month-grouped responses may carry totals only, without intervals
+        for key, value in sorted(
+            (obj.get("intervals") or {}).items(), key=lambda item: int(item[0])
+        ):
+            intervals[int(key)] = UsageInterval.from_dict(value)
+        feed_in_tariffs = obj.get("feed_in_tariffs") or None
+        return DailyUsage(
+            date=date,
+            range=UsageRange.from_dict(obj.get("range") or {}),
+            consumption=_to_float(obj, "consumption"),
+            bill_consumption=_to_float(obj, "bill_consumption"),
+            consumption_adjustment=_to_float(obj, "consumption_adjustment"),
+            percent_consumption_adjustment=_to_float(
+                obj, "percent_consumption_adjustment"
+            ),
+            fixed_charges_incl_gst=_to_float(obj, "fixed_charges_incl_gst"),
+            fixed_charges_excl_gst=_to_float(obj, "fixed_charges_excl_gst"),
+            total_charges_incl_gst=_to_float(obj, "total_charges_incl_gst"),
+            adjustment_charges_incl_gst=_to_float(obj, "adjustment_charges_incl_gst"),
+            status=str(obj.get("status", "")),
+            type=str(obj.get("type", "")),
+            usage_type=str(obj.get("usage_type", "")),
+            solar_feed_in_tariffs=bool(obj.get("solar_feed_in_tariffs")),
+            intervals=intervals,
+            feed_in_tariffs=(
+                FeedInTariffs.from_dict(feed_in_tariffs) if feed_in_tariffs else None
+            ),
+            tou_plus=obj.get("tou_plus") or {},
+        )
+
+
+@dataclass
+class ConsumptionInsights:
+    """Response of the consumption insights endpoint."""
+
+    type: str
+    range: UsageRange
+    group_breakdown: List[str]
+    usage: OrderedDict[str, DailyUsage]
+
+    @staticmethod
+    def from_dict(consumption_insights_data: dict) -> "ConsumptionInsights":
+        insights = consumption_insights_data.get("data")
+        usage: OrderedDict[str, DailyUsage] = OrderedDict()
+        for date in sorted((insights.get("usage") or {}).keys()):
+            usage[date] = DailyUsage.from_dict(date, insights["usage"][date])
+        return ConsumptionInsights(
+            type=str(insights.get("type", "")),
+            range=UsageRange.from_dict(insights.get("range") or {}),
+            group_breakdown=insights.get("group_breakdown") or [],
+            usage=usage,
+        )
+
+
+# Deprecated alias: the old ConsumptionAverage model never parsed real
+# responses; ConsumptionInsights replaces it.
+ConsumptionAverage = ConsumptionInsights
 
 
 @dataclass

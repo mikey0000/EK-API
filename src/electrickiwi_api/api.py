@@ -1,9 +1,12 @@
-from typing import Any
+import warnings
+from datetime import date
+from typing import Any, Union
 
 from electrickiwi_api.auth import AbstractAuth
 from electrickiwi_api.exceptions import AuthException, ApiException
 from electrickiwi_api.model import Hop, HopIntervals, BillFile, \
-    Bills, BillingFrequency, BillingAddress, CustomerConnection, Customer, Session, AccountSummary, Service, ConsumptionAverage
+    Bills, BillingFrequency, BillingAddress, CustomerConnection, Customer, Session, AccountSummary, Service, \
+    ConsumptionInsights
 
 
 
@@ -126,14 +129,24 @@ class ElectricKiwiApi:
         return AccountSummary.from_dict(await account_summary.json())
 
 
-    async def get_consumption_averages(self, start_date, end_date, group_by="week") -> ConsumptionAverage:
-        consumption_average = await self.auth.request("get", ElectricKiwiEndpoint.consumption_insights.format(
+    async def get_consumption_insights(self, start_date: Union[date, str], end_date: Union[date, str],
+                                       group_by: str = "day") -> ConsumptionInsights:
+        consumption_insights = await self.auth.request("get", ElectricKiwiEndpoint.consumption_insights.format(
             customerNumber=self.customer_number,
-            identifier=self.electricity.identifier),
-                                                      json={start_date: start_date, end_date: end_date,
-                                                            group_by: group_by})
-        check_status(consumption_average.status)
-        return ConsumptionAverage.from_dict(await consumption_average.json())
+            identifier=self.electricity.identifier,
+            startDate=str(start_date),
+            endDate=str(end_date),
+            groupBy=group_by))
+        check_status(consumption_insights.status)
+        return ConsumptionInsights.from_dict(await consumption_insights.json())
+
+    async def get_consumption_averages(self, start_date, end_date, group_by="week") -> ConsumptionInsights:
+        warnings.warn(
+            "get_consumption_averages is deprecated, use get_consumption_insights",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.get_consumption_insights(start_date, end_date, group_by)
 
     async def get_hop_intervals(self) -> HopIntervals:
         hop_intervals = await self.auth.request("get", ElectricKiwiEndpoint.hourofpower_intervals)
