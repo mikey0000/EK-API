@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name        = "electrickiwi-api"
-version     = "0.10.0"
+version     = "0.10.1"
 license     = "GPL-3.0-only"
 authors     = [
     { name = "Michael Arthur", email = "michael@jumblesoft.co.nz" },
